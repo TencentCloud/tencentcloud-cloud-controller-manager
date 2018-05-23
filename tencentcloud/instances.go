@@ -30,9 +30,18 @@ func (cloud *Cloud) NodeAddresses(ctx context.Context, name types.NodeName) ([]v
 		return addresses, nil
 	}
 
-	// TODO query by node ip
-
-	return []v1.NodeAddress{}, nil
+	node, err := cloud.getInstanceByInstancePrivateIp(string(name))
+	if err != nil {
+		return []v1.NodeAddress{}, err
+	}
+	addresses = make([]v1.NodeAddress, len(node.PrivateIPAddresses)+len(node.PublicIPAddresses))
+	for idx, ip := range node.PrivateIPAddresses {
+		addresses[idx] = v1.NodeAddress{Type: v1.NodeInternalIP, Address: ip}
+	}
+	for idx, ip := range node.PublicIPAddresses {
+		addresses[len(node.PrivateIPAddresses)+idx] = v1.NodeAddress{Type: v1.NodeExternalIP, Address: ip}
+	}
+	return addresses, nil
 }
 
 // NodeAddressesByProviderID returns the addresses of the specified instance.
@@ -69,13 +78,15 @@ func (cloud *Cloud) ExternalID(ctx context.Context, nodeName types.NodeName) (st
 		if err != nil {
 			return "", err
 		}
-		// TODO add tencentcloud:// prefix?
 		return instanceId, nil
 	}
 
-	// TODO query by node ip
+	node, err := cloud.getInstanceByInstancePrivateIp(string(nodeName))
+	if err != nil {
+		return "", err
+	}
 
-	return "", nil
+	return node.InstanceID, nil
 }
 
 // InstanceID returns the cloud provider ID of the node with the specified NodeName.
@@ -87,21 +98,20 @@ func (cloud *Cloud) InstanceID(ctx context.Context, nodeName types.NodeName) (st
 			return "", err
 		}
 
-		// TODO use metadata api or config
-		zone, err := cloud.metadata.Zone()
-		if err != nil {
-			return "", err
-		}
-		return fmt.Sprintf("/%s/%s", zone, instanceId), nil
+		// TODO use metadata api or config ?
+		return fmt.Sprintf("/%s/%s", cloud.config.Zone, instanceId), nil
 	}
 
-	// TODO query node by ip
-	return "", nil
+	node, err := cloud.getInstanceByInstancePrivateIp(string(nodeName))
+	if err != nil {
+		return "", err
+	}
+
+	return fmt.Sprintf("/%s/%s", cloud.config.Zone, node.InstanceID), nil
 }
 
 // InstanceType returns the type of the specified instance.
 func (cloud *Cloud) InstanceType(ctx context.Context, name types.NodeName) (string, error) {
-	// TODO use tencentcloud?
 	return providerName, nil
 }
 

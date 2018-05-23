@@ -17,7 +17,7 @@ import (
 )
 
 const (
-	providerName = "tencentcloud"
+	providerName = "qcloud"
 )
 
 func init() {
@@ -74,7 +74,7 @@ func (cloud *Cloud) Initialize(clientBuilder controller.ControllerClientBuilder)
 	cloud.cvm = cvmClient
 	ccsClient, err := ccs.NewClient(
 		common.Credential{SecretId: cloud.config.SecretId, SecretKey: cloud.config.SecretKey},
-		common.Opts{Region: "cq"},
+		common.Opts{Region: cloud.config.Region},
 	)
 	if err != nil {
 		panic(err)
