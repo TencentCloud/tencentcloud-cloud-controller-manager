@@ -2,11 +2,10 @@ package tencentcloud
 
 import (
 	"encoding/json"
+	"errors"
 	"io"
 	"io/ioutil"
-	"net/http"
 
-	"github.com/dbdd4us/qcloudapi-sdk-go/metadata"
 	"github.com/dbdd4us/qcloudapi-sdk-go/cvm"
 	"github.com/dbdd4us/qcloudapi-sdk-go/ccs"
 	"github.com/dbdd4us/qcloudapi-sdk-go/common"
@@ -17,7 +16,11 @@ import (
 )
 
 const (
-	providerName = "qcloud"
+	providerName = "tencentcloud"
+)
+
+var (
+	CloudInstanceNotFound = errors.New("tencentcloud instance not found")
 )
 
 func init() {
@@ -43,14 +46,12 @@ type Cloud struct {
 
 	kubeClient kubernetes.Interface
 
-	metadata *metadata.MetaData
-	cvm      *cvm.Client
-	ccs      *ccs.Client
+	cvm *cvm.Client
+	ccs *ccs.Client
 }
 
 type Config struct {
 	Region string `json:"region"`
-	Zone   string `json:"zone"`
 
 	VpcId     string `json:"vpcId"`
 	SecretId  string `json:"secret_id"`
@@ -63,7 +64,6 @@ type Config struct {
 // to perform housekeeping activities within the cloud provider.
 func (cloud *Cloud) Initialize(clientBuilder controller.ControllerClientBuilder) {
 	cloud.kubeClient = clientBuilder.ClientOrDie("tencentcloud-cloud-provider")
-	cloud.metadata = metadata.NewMetaData(http.DefaultClient)
 	cvmClient, err := cvm.NewClient(
 		common.Credential{SecretId: cloud.config.SecretId, SecretKey: cloud.config.SecretKey},
 		common.Opts{Region: cloud.config.Region},

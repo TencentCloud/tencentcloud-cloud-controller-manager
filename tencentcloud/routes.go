@@ -16,9 +16,9 @@ func (cloud *Cloud) ListRoutes(ctx context.Context, clusterName string) ([]*clou
 		return []*cloudprovider.Route{}, err
 	}
 
-	routes := make([]*cloudprovider.Route, len(cloudRoutes.RouteSet))
+	routes := make([]*cloudprovider.Route, len(cloudRoutes.Data.RouteSet))
 
-	for idx, route := range cloudRoutes.RouteSet {
+	for idx, route := range cloudRoutes.Data.RouteSet {
 		routes[idx] = &cloudprovider.Route{Name: route.GatewayIp, TargetNode: types.NodeName(route.GatewayIp), DestinationCIDR: route.DestinationCidrBlock}
 	}
 	return routes, nil
@@ -41,7 +41,7 @@ func (cloud *Cloud) CreateRoute(ctx context.Context, clusterName string, nameHin
 // Route should be as returned by ListRoutes
 func (cloud *Cloud) DeleteRoute(ctx context.Context, clusterName string, route *cloudprovider.Route) error {
 	_, err := cloud.ccs.DeleteClusterRoute(&ccs.DeleteClusterRouteArgs{
-		RouteTableName:       route.Name,
+		RouteTableName:       cloud.config.ClusterRouteTable,
 		GatewayIp:            string(route.TargetNode),
 		DestinationCidrBlock: route.DestinationCIDR,
 	})

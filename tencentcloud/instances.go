@@ -4,6 +4,7 @@ import (
 	"context"
 	"strings"
 	"fmt"
+	"errors"
 
 	"github.com/dbdd4us/qcloudapi-sdk-go/cvm"
 
@@ -17,24 +18,11 @@ import (
 // returns the address of the calling instance. We should do a rename to
 // make this clearer.
 func (cloud *Cloud) NodeAddresses(ctx context.Context, name types.NodeName) ([]v1.NodeAddress, error) {
-	addresses := make([]v1.NodeAddress, 0)
-
-	privateIp, err := cloud.metadata.PrivateIPv4()
-	if err == nil && privateIp == string(name) {
-		addresses = append(addresses, v1.NodeAddress{Type: v1.NodeInternalIP, Address: privateIp})
-
-		publicIp, err := cloud.metadata.PublicIPv4()
-		if err != nil && len(publicIp) > 0 {
-			addresses = append(addresses, v1.NodeAddress{Type: v1.NodeExternalIP, Address: publicIp})
-		}
-		return addresses, nil
-	}
-
 	node, err := cloud.getInstanceByInstancePrivateIp(string(name))
 	if err != nil {
 		return []v1.NodeAddress{}, err
 	}
-	addresses = make([]v1.NodeAddress, len(node.PrivateIPAddresses)+len(node.PublicIPAddresses))
+	addresses := make([]v1.NodeAddress, len(node.PrivateIPAddresses)+len(node.PublicIPAddresses))
 	for idx, ip := range node.PrivateIPAddresses {
 		addresses[idx] = v1.NodeAddress{Type: v1.NodeInternalIP, Address: ip}
 	}
@@ -66,21 +54,12 @@ func (cloud *Cloud) NodeAddressesByProviderID(ctx context.Context, providerID st
 		}
 		return addresses, nil
 	}
-	return []v1.NodeAddress{}, nil
+	return []v1.NodeAddress{}, errors.New(fmt.Sprintf("invalid format for providerId %s", providerID))
 }
 
 // ExternalID returns the cloud provider ID of the node with the specified NodeName.
 // Note that if the instance does not exist or is no longer running, we must return ("", cloudprovider.InstanceNotFound)
 func (cloud *Cloud) ExternalID(ctx context.Context, nodeName types.NodeName) (string, error) {
-	privateIp, err := cloud.metadata.PrivateIPv4()
-	if err == nil && privateIp == string(nodeName) {
-		instanceId, err := cloud.metadata.InstanceID()
-		if err != nil {
-			return "", err
-		}
-		return instanceId, nil
-	}
-
 	node, err := cloud.getInstanceByInstancePrivateIp(string(nodeName))
 	if err != nil {
 		return "", err
@@ -91,23 +70,12 @@ func (cloud *Cloud) ExternalID(ctx context.Context, nodeName types.NodeName) (st
 
 // InstanceID returns the cloud provider ID of the node with the specified NodeName.
 func (cloud *Cloud) InstanceID(ctx context.Context, nodeName types.NodeName) (string, error) {
-	privateIp, err := cloud.metadata.PrivateIPv4()
-	if err == nil && privateIp == string(nodeName) {
-		instanceId, err := cloud.metadata.InstanceID()
-		if err != nil {
-			return "", err
-		}
-
-		// TODO use metadata api or config ?
-		return fmt.Sprintf("/%s/%s", cloud.config.Zone, instanceId), nil
-	}
-
 	node, err := cloud.getInstanceByInstancePrivateIp(string(nodeName))
 	if err != nil {
 		return "", err
 	}
 
-	return fmt.Sprintf("/%s/%s", cloud.config.Zone, node.InstanceID), nil
+	return fmt.Sprintf("/%s/%s", node.Placement.Zone, node.InstanceID), nil
 }
 
 // InstanceType returns the type of the specified instance.
@@ -129,11 +97,7 @@ func (cloud *Cloud) AddSSHKeyToAllInstances(ctx context.Context, user string, ke
 // CurrentNodeName returns the name of the node we are currently running on
 // On most clouds (e.g. GCE) this is the hostname, so we provide the hostname
 func (cloud *Cloud) CurrentNodeName(ctx context.Context, hostname string) (types.NodeName, error) {
-	privateIp, err := cloud.metadata.PrivateIPv4()
-	if err != nil {
-		return types.NodeName(""), err
-	}
-	return types.NodeName(privateIp), nil
+	return types.NodeName(""), cloudprovider.NotImplemented
 }
 
 // InstanceExistsByProviderID returns true if the instance for the given provider id still is running.
@@ -144,6 +108,7 @@ func (cloud *Cloud) InstanceExistsByProviderID(ctx context.Context, providerID s
 
 func (cloud *Cloud) getInstanceByInstancePrivateIp(privateIp string) (*cvm.InstanceInfo, error) {
 	instances, err := cloud.cvm.DescribeInstances(&cvm.DescribeInstancesArgs{
+		Version: cvm.DefaultVersion,
 		Filters: &[]cvm.Filter{cvm.NewFilter(cvm.FilterNamePrivateIpAddress, privateIp)},
 	})
 	if err != nil {
@@ -156,12 +121,12 @@ func (cloud *Cloud) getInstanceByInstancePrivateIp(privateIp string) (*cvm.Insta
 			}
 		}
 	}
-
-	return nil, cloudprovider.InstanceNotFound
+	return nil, CloudInstanceNotFound
 }
 
 func (cloud *Cloud) getInstanceByInstanceID(instanceID string) (*cvm.InstanceInfo, error) {
 	instances, err := cloud.cvm.DescribeInstances(&cvm.DescribeInstancesArgs{
+		Version: cvm.DefaultVersion,
 		Filters: &[]cvm.Filter{cvm.NewFilter(cvm.FilterNameInstanceId, instanceID)},
 	})
 	if err != nil {
@@ -172,6 +137,5 @@ func (cloud *Cloud) getInstanceByInstanceID(instanceID string) (*cvm.InstanceInf
 			return &instance, nil
 		}
 	}
-
-	return nil, cloudprovider.InstanceNotFound
+	return nil, CloudInstanceNotFound
 }
