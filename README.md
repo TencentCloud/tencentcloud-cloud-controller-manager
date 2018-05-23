@@ -4,6 +4,17 @@
 
 **WARNING**: this project is a work in progress and may not be production ready. Currently, only Kubernetes 1.10.x is supported.
 
+## Implementation Details
+
+Currently `tencentcloud-cloud-controller-manager` implements:
+
+* nodecontroller - updates nodes with cloud provider specific labels and addresses.
+* routecontroller - responsible for creating routes in vpc
+
+In the future, it may implement:
+
+* servicecontroller - responsible for creating LoadBalancers when a service of `Type: LoadBalancer` is created in Kubernetes.
+
 ## Requirements
 
 At the current state of Kubernetes, running cloud controller manager requires a few things. Please read through the requirements carefully as they are critical to running cloud controller manager on a Kubernetes cluster on Tencent Cloud.
@@ -16,3 +27,5 @@ All `kubelet`s in your cluster **MUST** set the flag `--cloud-provider=external`
 In the future, `--cloud-provider=external` will be the default. Learn more about the future of cloud providers in Kubernetes [here](https://github.com/kubernetes/community/blob/master/contributors/design-proposals/cloud-provider/cloud-provider-refactoring.md).
 
 ### Kubernetes node names must match the instance private ipv4 ip
+
+By default, the kubelet will name nodes based on the node's hostname. On TencentCloud Container Service, node hostnames are set based on the private ipv4 ip of the instance. If you decide to override the hostname on kubelets with --hostname-override, this will also override the node name in Kubernetes. It is important that the node name on Kubernetes matches private ipv4 ip of the instance, otherwise cloud controller manager cannot find the corresponding instance to nodes.
