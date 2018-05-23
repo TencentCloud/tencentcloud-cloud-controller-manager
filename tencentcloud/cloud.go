@@ -5,6 +5,7 @@ import (
 	"errors"
 	"io"
 	"io/ioutil"
+	"os"
 
 	"github.com/dbdd4us/qcloudapi-sdk-go/cvm"
 	"github.com/dbdd4us/qcloudapi-sdk-go/ccs"
@@ -28,14 +29,29 @@ func init() {
 }
 
 func NewCloud(config io.Reader) (cloudprovider.Interface, error) {
-	cfg, err := ioutil.ReadAll(config)
-	if err != nil {
-		return nil, err
+	var c Config
+	if config != nil {
+		cfg, err := ioutil.ReadAll(config)
+		if err != nil {
+			return nil, err
+		}
+		if err := json.Unmarshal(cfg, &c); err != nil {
+			return nil, err
+		}
 	}
 
-	var c Config
-	if err := json.Unmarshal(cfg, &c); err != nil {
-		return nil, err
+	if c.Region == "" {
+		c.Region = os.Getenv("TENCENTCLOUD_CLOUD_CONTROLLER_MANAGER_REGION")
+	}
+	if c.SecretId == "" {
+		c.SecretId = os.Getenv("TENCENTCLOUD_CLOUD_CONTROLLER_MANAGER_SECRET_ID")
+	}
+	if c.SecretKey == "" {
+		c.SecretKey = os.Getenv("TENCENTCLOUD_CLOUD_CONTROLLER_MANAGER_SECRET_KEY")
+	}
+
+	if c.ClusterRouteTable == "" {
+		c.ClusterRouteTable = os.Getenv("TENCENTCLOUD_CLOUD_CONTROLLER_MANAGER_CLUSTER_ROUTE_TABLE")
 	}
 
 	return &Cloud{config: c}, nil
@@ -53,7 +69,6 @@ type Cloud struct {
 type Config struct {
 	Region string `json:"region"`
 
-	VpcId     string `json:"vpcId"`
 	SecretId  string `json:"secret_id"`
 	SecretKey string `json:"secret_key"`
 
