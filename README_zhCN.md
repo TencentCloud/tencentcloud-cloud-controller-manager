@@ -30,9 +30,27 @@
 
 默认情况下，kubelet 会使用节点的 hostname 作为节点的名称。可以使用 --hostname-override 参数使用节点的内网 ip 覆盖掉节点本身的 hostname，从而使得节点的名称和节点的内网 ip 保持一致。这一点非常重要，否则 cloud controller manager 会无法找到对应 kubernetes 节点的云服务器。
 
-## 运行 tencent cloud controller manager 
+## 编译
 
-**注意**: tencent cloud controller manager 仅适用于腾讯云 VPC 环境搭建的 kubernetes 集群，运行 tencent cloud controller manager 之前需要为 kubernetes 集群创建相应的集群网络路由表，具体的网络需要自行做好规划，创建路由表的方法请见 [这里](https://github.com/dbdd4us/tencentcloud-cloud-controller-manager/blob/master/README.md)。
+### 编译二进制文件
+将此项目 clone 到 GOPATH 下，假设 GOPATH 为 /root/go
+
+```
+mkdir -p /root/go/src/github.com/dbdd4us/
+git clone https://github.com/dbdd4us/tencentcloud-cloud-controller-manager.git /root/go/src/github.com/dbdd4us/tencentcloud-cloud-controller-manager
+cd /root/go/src/github.com/dbdd4us/tencentcloud-cloud-controller-manager
+go build -v
+```
+
+### 打包 Docker Image (需要 Docker 17.05 或者更高版本)
+
+```
+docker build -f Dockerfile.multistage -t tencentcloud-cloud-controller-manager:latest .
+```
+
+## 运行 tencent cloud controller manager
+
+**注意**: tencent cloud controller manager 仅适用于腾讯云 VPC 环境搭建的 kubernetes 集群，运行 tencent cloud controller manager 之前需要为 kubernetes 集群创建相应的集群网络路由表，具体的网络需要自行做好规划，创建路由表的方法请见 [这里](https://github.com/dbdd4us/tencentcloud-cloud-controller-manager/blob/master/route-ctl/README.md)。
 
 1. 创建 ConfigMap
 
@@ -78,11 +96,11 @@ spec:
         name: tencentcloud-cloud-controller-manager
         command:
           - /bin/tencentcloud-cloud-controller-manager
-          - --cloud-provider=tencentcloud
-          - --allocate-node-cidrs=true
-          - --cluster-cidr=192.168.0.0/20
-          - --master=<KUBERNETES_MASTER_INSECURE_ENDPOINT>
-          - --cluster-name=<KUBERNETES_CLUSTER_NAME>
+          - --cloud-provider=tencentcloud # 指定 cloud provider 为 tencentcloud
+          - --allocate-node-cidrs=true # 指定 cloud provider 为 tencentcloud 为 node 分配 cidr
+          - --cluster-cidr=192.168.0.0/20 # 集群 pod 所在网络，需要提前创建
+          - --master=<KUBERNETES_MASTER_INSECURE_ENDPOINT> # master 的非 https api 地址
+          - --cluster-name=<KUBERNETES_CLUSTER_NAME> # 集群名称
           - --configure-cloud-routes=true
         env:
           - name: TENCENTCLOUD_CLOUD_CONTROLLER_MANAGER_REGION
