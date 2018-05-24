@@ -18,6 +18,8 @@ go build -v
 
 ## 使用
 
+**注意**:  routetable 的 cidr 不能与对应 vpc 的 cidr、其他集群的 cidr 以及已经存在的子网的 cidr 存在冲突
+
 使用前需要通过环境变量设置 `QCloudSecretId`、 `QCloudSecretKey` 以及 `QCloudCcsAPIRegion`
 
 ```
