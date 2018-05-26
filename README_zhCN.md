@@ -102,6 +102,7 @@ spec:
           - --master=<KUBERNETES_MASTER_INSECURE_ENDPOINT> # master 的非 https api 地址
           - --cluster-name=<KUBERNETES_CLUSTER_NAME> # 集群名称
           - --configure-cloud-routes=true
+          - --allow-untagged-cloud=true
         env:
           - name: TENCENTCLOUD_CLOUD_CONTROLLER_MANAGER_REGION
             valueFrom:
