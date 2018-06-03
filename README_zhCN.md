@@ -64,7 +64,6 @@ data:
   # 需要注意的是,secret 的 value 需要进行 base64 编码
   #   echo -n "<REGION>" | base64
   TENCENTCLOUD_CLOUD_CONTROLLER_MANAGER_REGION: "<REGION>"
-  TENCENTCLOUD_CLOUD_CONTROLLER_MANAGER_VPC_ID: "<ACCESS_KEY_SECRET>"
   TENCENTCLOUD_CLOUD_CONTROLLER_MANAGER_SECRET_ID: "<SECRET_ID>"
   TENCENTCLOUD_CLOUD_CONTROLLER_MANAGER_SECRET_KEY: "<SECRET_KEY>" 
   TENCENTCLOUD_CLOUD_CONTROLLER_MANAGER_CLUSTER_ROUTE_TABLE: "<CLUSTER_NETWORK_ROUTE_TABLE_NAME>" 
@@ -91,6 +90,9 @@ spec:
         - key: "node.cloudprovider.kubernetes.io/uninitialized"
           value: "true"
           effect: "NoSchedule"
+        - key: "node.kubernetes.io/network-unavailable"
+          value: "true"
+          effect: "NoSchedule"
       containers:
       - image: ccr.ccs.tencentyun.com/library/tencentcloud-cloud-controller-manager:latest
         name: tencentcloud-cloud-controller-manager
@@ -109,11 +111,6 @@ spec:
               secretKeyRef:
                 name: tencentcloud-cloud-controller-manager-config
                 key: TENCENTCLOUD_CLOUD_CONTROLLER_MANAGER_REGION
-          - name: TENCENTCLOUD_CLOUD_CONTROLLER_MANAGER_VPC_ID
-            valueFrom:
-              secretKeyRef:
-                name: tencentcloud-cloud-controller-manager-config
-                key: TENCENTCLOUD_CLOUD_CONTROLLER_MANAGER_VPC_ID
           - name: TENCENTCLOUD_CLOUD_CONTROLLER_MANAGER_SECRET_ID
             valueFrom:
               secretKeyRef:

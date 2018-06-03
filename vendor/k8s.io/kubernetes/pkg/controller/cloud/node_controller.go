@@ -305,6 +305,17 @@ func (cnc *CloudNodeController) AddCloudNode(obj interface{}) {
 	}
 
 	err := clientretry.RetryOnConflict(UpdateNodeSpecBackoff, func() error {
+		if cnc.cloud.ProviderName() == "tencentcloud" {
+			if err := nodeutil.SetNodeCondition(cnc.kubeClient, types.NodeName(node.Name), v1.NodeCondition{
+				Type:               v1.NodeNetworkUnavailable,
+				Status:             v1.ConditionTrue,
+				Reason:             "NoRouteCreated",
+				Message:            "Node created without a route",
+				LastTransitionTime: metav1.Now(),
+			}); err != nil {
+				return err
+			}
+		}
 		curNode, err := cnc.kubeClient.CoreV1().Nodes().Get(node.Name, metav1.GetOptions{})
 		if err != nil {
 			return err
