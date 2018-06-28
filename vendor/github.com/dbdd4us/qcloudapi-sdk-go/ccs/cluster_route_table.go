@@ -1,9 +1,10 @@
 package ccs
 
 type CreateClusterRouteTableArgs struct {
-	RouteTableName      string `qcloud_arg:"RouteTableName"`
-	RouteTableCidrBlock string `qcloud_arg:"RouteTableCidrBlock"`
-	VpcId               string `qcloud_arg:"VpcId"`
+	RouteTableName            string `qcloud_arg:"RouteTableName"`
+	RouteTableCidrBlock       string `qcloud_arg:"RouteTableCidrBlock"`
+	VpcId                     string `qcloud_arg:"VpcId"`
+	IgnoreClusterCIDRConflict int    `qcloud_arg:"IgnoreClusterCidrConflict"`
 }
 
 type CreateClusterRouteTableResponse struct {

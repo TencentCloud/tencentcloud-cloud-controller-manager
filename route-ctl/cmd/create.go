@@ -15,6 +15,7 @@ func init() {
 	createCmd.Flags().StringVar(&routeTableName, "route-table-name", "", "name of the route table to create")
 	createCmd.Flags().StringVar(&routeTableCidrBlock, "route-table-cidr-block", "", "cidr of the route table to create")
 	createCmd.Flags().StringVar(&vpcId, "vpc-id", "", "vpc id of the route table to create")
+	createCmd.Flags().BoolVar(&ignoreConflict, "ignore-cidr-conflict", false, "Default false, ignore any cidr conflict when create route table. (Caution: This may results in disaster, use it very carefully)")
 
 	createCmd.MarkFlagRequired("route-table-name")
 	createCmd.MarkFlagRequired("route-table-cidr-block")
@@ -36,10 +37,16 @@ var createCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
+
+		ignoreConflictOpt := 0
+		if ignoreConflict {
+			ignoreConflictOpt = 1
+		}
 		_, err = client.CreateClusterRouteTable(&ccs.CreateClusterRouteTableArgs{
-			RouteTableName:      routeTableName,
-			RouteTableCidrBlock: routeTableCidrBlock,
-			VpcId:               vpcId,
+			RouteTableName:            routeTableName,
+			RouteTableCidrBlock:       routeTableCidrBlock,
+			VpcId:                     vpcId,
+			IgnoreClusterCIDRConflict: ignoreConflictOpt,
 		})
 		return err
 	},
@@ -49,4 +56,5 @@ var (
 	routeTableName      string
 	routeTableCidrBlock string
 	vpcId               string
+	ignoreConflict      bool
 )
