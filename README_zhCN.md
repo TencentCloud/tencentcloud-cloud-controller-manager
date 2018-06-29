@@ -102,7 +102,6 @@ spec:
           - --allocate-node-cidrs=true # 指定 cloud provider 为 tencentcloud 为 node 分配 cidr
           - --cluster-cidr=192.168.0.0/20 # 集群 pod 所在网络，需要提前创建
           - --master=<KUBERNETES_MASTER_INSECURE_ENDPOINT> # master 的非 https api 地址
-          - --cluster-name=<KUBERNETES_CLUSTER_NAME> # 集群名称
           - --configure-cloud-routes=true
           - --allow-untagged-cloud=true
         env:
