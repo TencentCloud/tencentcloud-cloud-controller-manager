@@ -30,6 +30,26 @@ type DescribeClusterRouteTableResponse struct {
 	} `json:"data"`
 }
 
+type CheckClusterRouteTableCidrConflictArgs struct {
+	RouteTableCidrBlock string `qcloud_arg:"RouteTableCidrBlock"`
+	VpcId               string `qcloud_arg:"VpcId"`
+}
+
+type CheckClusterRouteTableCidrConflictResponse struct {
+	Response
+	Data struct {
+		HasConflict   bool           `json:"HasConflict"`
+		CidrConflicts []CidrConflict `json:"CidrConflicts"`
+	} `json:"data"`
+}
+
+type CidrConflict struct {
+	Type string `json:"Type"`
+	Cidr string `json:"Cidr,omitempty"`
+	Name string `json:"Name,omitempty"`
+	Id   string `json:"Id,omitempty"`
+}
+
 type RouteTableInfo struct {
 	RouteTableName      string `json:"RouteTableName"`
 	RouteTableCidrBlock string `json:"RouteTableCidrBlock"`
@@ -59,6 +79,15 @@ func (client *Client) DescribeClusterRouteTable(args *DescribeClusterRouteTableA
 	err := client.Invoke("DescribeClusterRouteTable", args, response)
 	if err != nil {
 		return &DescribeClusterRouteTableResponse{}, err
+	}
+	return response, nil
+}
+
+func (client *Client) CheckClusterRouteTableCidrConflict(args *CheckClusterRouteTableCidrConflictArgs) (*CheckClusterRouteTableCidrConflictResponse, error) {
+	response := &CheckClusterRouteTableCidrConflictResponse{}
+	err := client.Invoke("CheckClusterRouteTableCidrConflict", args, response)
+	if err != nil {
+		return &CheckClusterRouteTableCidrConflictResponse{}, err
 	}
 	return response, nil
 }

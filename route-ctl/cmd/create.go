@@ -1,7 +1,10 @@
 package cmd
 
 import (
+	"fmt"
+	"net"
 	"os"
+	"text/tabwriter"
 
 	"github.com/spf13/cobra"
 	"github.com/dbdd4us/qcloudapi-sdk-go/ccs"
@@ -31,11 +34,37 @@ var createCmd = &cobra.Command{
 		secretKey := os.Getenv("QCloudSecretKey")
 		region := os.Getenv("QCloudCcsAPIRegion")
 		logger := logrus.New()
-		//logger.SetLevel(logrus.ErrorLevel)
+
+		_, cidr, err := net.ParseCIDR(routeTableCidrBlock)
+		if err != nil {
+			return fmt.Errorf("invalid cidr %s", routeTableCidrBlock)
+		}
 
 		client, err := ccs.NewClient(common.Credential{SecretId: secretId, SecretKey: secretKey}, common.Opts{Logger: logger, Region: region})
 		if err != nil {
 			return err
+		}
+
+		response, err := client.CheckClusterRouteTableCidrConflict(&ccs.CheckClusterRouteTableCidrConflictArgs{
+			RouteTableCidrBlock: cidr.String(),
+			VpcId:               vpcId,
+		})
+		if err != nil {
+			return err
+		}
+
+		if response.Data.HasConflict {
+			logger.Errorf("Cidr %s has following conflicts. Use --ignore-cidr-conflict to ignore conflict. (Caution: This operation is dangerous and may results in disaster, use it very carefully)\n", routeTableCidrBlock)
+			w := tabwriter.NewWriter(os.Stdout, 0, 0, 8, ' ', tabwriter.TabIndent)
+			fmt.Fprintln(w, fmt.Sprintf("%s\t%s\t%s\t%s\t", "ConflictType", "Name", "Id", "Cidr"))
+			for _, conflict := range response.Data.CidrConflicts {
+				fmt.Fprintln(w, fmt.Sprintf("%s\t%s\t%s\t%s\t", conflict.Type, conflict.Name, conflict.Id, conflict.Cidr))
+			}
+			w.Flush()
+
+			if !ignoreConflict {
+				return nil
+			}
 		}
 
 		ignoreConflictOpt := 0
