@@ -33,6 +33,15 @@ export QCloudCcsAPIRegion=ap-shanghai
 ./route-ctl create --route-table-cidr-block 10.10.0.0/16 --route-table-name route-table-test --vpc-id vpc-********
 ```
 
+当通过 `route-ctl` 创建路由表时， `route-ctl` 会先检查所要创建的路由表的 `cidr` 是否和现存的网络设置冲突，具体的检查包括下面四项：
+
+1. route table 所在 vpc 的 cidr
+2. route table 所在 vpc 的子网路由的 cidr
+3. route table 所在 vpc 的 ccs 集群的集群网络 cidr
+4. route table 所在 vpc 的其它通过 route-ctl 创建的 route table 的 cidr
+
+___Note:___ 当存在 `cidr` 冲突时，`route-ctl` 支持通过 `--ignore-cidr-conflict` 选项忽略冲突进行创建，需要注意的是，通过 route table 创建的具体路由条目在 vpc 内拥有最高的匹配优先级，忽略 `cidr` 冲突进行创建可能会导致现存的网络出现问题，___请谨慎使用___。
+
 ### 查看现存的路由表
 ```
 ./route-ctl list
