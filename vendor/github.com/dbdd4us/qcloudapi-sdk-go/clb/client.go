@@ -1,4 +1,4 @@
-package cvm
+package clb
 
 import (
 	"os"
@@ -7,11 +7,8 @@ import (
 )
 
 const (
-	CvmHost = "cvm.api.qcloud.com"
-	CvmPath = "/v2/index.php"
-
-	CvmV3Host = "cvm.tencentcloudapi.com"
-	CvmV3Path = "/"
+	CLBHost = "lb.api.qcloud.com"
+	CLBPath = "/v2/index.php"
 )
 
 type Client struct {
@@ -20,10 +17,10 @@ type Client struct {
 
 func NewClient(credential common.CredentialInterface, opts common.Opts) (*Client, error) {
 	if opts.Host == "" {
-		opts.Host = CvmHost
+		opts.Host = CLBHost
 	}
 	if opts.Path == "" {
-		opts.Path = CvmPath
+		opts.Path = CLBPath
 	}
 
 	client, err := common.NewClient(credential, opts)
@@ -37,9 +34,9 @@ func NewClientFromEnv() (*Client, error) {
 
 	secretId := os.Getenv("QCloudSecretId")
 	secretKey := os.Getenv("QCloudSecretKey")
-	region := os.Getenv("QCloudCvmAPIRegion")
-	host := os.Getenv("QCloudCvmAPIHost")
-	path := os.Getenv("QCloudCvmAPIPath")
+	region := os.Getenv("QCloudClbAPIRegion")
+	host := os.Getenv("QCloudClbAPIHost")
+	path := os.Getenv("QCloudClbAPIPath")
 
 	return NewClient(
 		common.Credential{

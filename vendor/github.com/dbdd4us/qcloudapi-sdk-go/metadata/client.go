@@ -141,10 +141,10 @@ func (m *MetaDataClient) send() (string, error) {
 	if err != nil {
 		return "", err
 	}
+	defer resp.Body.Close()
 	if resp.StatusCode != 200 {
 		return "", err
 	}
-	defer resp.Body.Close()
 
 	data, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
