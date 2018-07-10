@@ -25,6 +25,7 @@ type DescribeLoadBalancersArgs struct {
 	ProjectId        *int      `qcloud_arg:"projectId"`
 	Forward          *int      `qcloud_arg:"forward"`
 	WithRs           *int      `qcloud_arg:"withRs"`
+	Special          *string   `qcloud_arg:"special"`
 }
 
 type DescribeLoadBalancersResponse struct {
@@ -86,6 +87,7 @@ type CreateLoadBalancerArgs struct {
 	SubnetId         *string `qcloud_arg:"subnetId"`
 	ProjectId        *int    `qcloud_arg:"projectId"`
 	Number           *int    `qcloud_arg:"number"`
+	Special          *string `qcloud_arg:"special"`
 }
 
 type CreateLoadBalancerResponse struct {

@@ -23,6 +23,11 @@ const (
 
 	// subnet id for private network based clb
 	ServiceAnnotationLoadBalancerTypeInternalSubnetId = "service.beta.kubernetes.io/tencentcloud-loadbalancer-type-internal-subnet-id"
+
+	// TODO enable name updating
+	// name annotation for loadbalancer
+	ServiceAnnotationLoadBalancerName        = "service.beta.kubernetes.io/tencentcloud-loadbalancer-name"
+	ServiceAnnotationLoadBalancerNameDefault = "kubernetes-loadbalancer"
 )
 
 var (
@@ -120,8 +125,8 @@ func (cloud *Cloud) getLoadBalancerByName(name string) (*clb.LoadBalancer, error
 	// we don't need to check loadbalancer kind here because ensureLoadBalancerInstance will ensure the kind is right
 	forward := -1
 	response, err := cloud.clb.DescribeLoadBalancers(&clb.DescribeLoadBalancersArgs{
-		LoadBalancerName: &name,
-		Forward:          &forward,
+		Special: &name,
+		Forward: &forward,
 	})
 	if err != nil {
 		return nil, err
@@ -711,11 +716,12 @@ func (cloud *Cloud) ensureApplicationLoadBalancerBackends(ctx context.Context, c
 }
 
 func (cloud *Cloud) createLoadBalancer(ctx context.Context, clusterName string, service *v1.Service) (*clb.LoadBalancer, error) {
+	// TODO replace variable with loadBalancerSpecial
 	loadBalancerName := cloudprovider.GetLoadBalancerName(service)
 
 	args := clb.CreateLoadBalancerArgs{
-		VpcId:            &cloud.config.VpcId,
-		LoadBalancerName: &loadBalancerName,
+		VpcId:   &cloud.config.VpcId,
+		Special: &loadBalancerName,
 	}
 
 	loadBalancerDesiredKind, ok := service.Annotations[ServiceAnnotationLoadBalancerKind]
@@ -726,6 +732,12 @@ func (cloud *Cloud) createLoadBalancer(ctx context.Context, clusterName string, 
 	if !ok || (loadBalancerDesiredType != LoadBalancerTypePrivate && loadBalancerDesiredType != LoadBalancerTypePublic) {
 		loadBalancerDesiredType = LoadBalancerTypePublic
 	}
+	loadBalancerDesiredName, ok := service.Annotations[ServiceAnnotationLoadBalancerName]
+	if !ok {
+		loadBalancerDesiredName = ServiceAnnotationLoadBalancerNameDefault
+	}
+
+	args.LoadBalancerName = &loadBalancerDesiredName
 
 	switch loadBalancerDesiredKind {
 	case LoadBalancerKindApplication:

@@ -135,6 +135,7 @@ spec:
 * `service.beta.kubernetes.io/tencentcloud-loadbalancer-kind`: 当指定为 `classic` 时创建传统型 Clb，当指定为 `application` 时创建应用型 Clb，默认值为 `application`。
 * `service.beta.kubernetes.io/tencentcloud-loadbalancer-type`：当指定为 `public` 时创建公网型 Clb，当指定为 `private` 时创建内网型 Clb，默认值为 `public`。
 * `service.beta.kubernetes.io/tencentcloud-loadbalancer-type-internal-subnet-id`：当创建的 Clb 类型为内网型时，必须要指定此字段，代表内网型 Clb 创建时的子网参数。
+* `service.beta.kubernetes.io/tencentcloud-loadbalancer-name`: 创建的 Clb 的名称。**注意**，仅当 Clb 需要创建或重新创建时，此参数才会生效。
 
 ### 创建公网应用型 Clb
 
