@@ -36,9 +36,9 @@
 将此项目 clone 到 GOPATH 下，假设 GOPATH 为 /root/go
 
 ```
-mkdir -p /root/go/src/github.com/dbdd4us/
-git clone https://github.com/dbdd4us/tencentcloud-cloud-controller-manager.git /root/go/src/github.com/dbdd4us/tencentcloud-cloud-controller-manager
-cd /root/go/src/github.com/dbdd4us/tencentcloud-cloud-controller-manager
+mkdir -p /root/go/src/github.com/tencentcloud/
+git clone https://github.com/tencentcloud/tencentcloud-cloud-controller-manager.git /root/go/src/github.com/tencentcloud/tencentcloud-cloud-controller-manager
+cd /root/go/src/github.com/tencentcloud/tencentcloud-cloud-controller-manager
 go build -v
 ```
 
@@ -50,7 +50,7 @@ docker build -f Dockerfile.multistage -t tencentcloud-cloud-controller-manager:l
 
 ## 运行 tencent cloud controller manager
 
-**注意**: tencent cloud controller manager 仅适用于腾讯云 VPC 环境搭建的 kubernetes 集群，运行 tencent cloud controller manager 之前需要为 kubernetes 集群创建相应的集群网络路由表，具体的网络需要自行做好规划，创建路由表的方法请见 [这里](https://github.com/dbdd4us/tencentcloud-cloud-controller-manager/blob/master/route-ctl/README.md)。
+**注意**: tencent cloud controller manager 仅适用于腾讯云 VPC 环境搭建的 kubernetes 集群，运行 tencent cloud controller manager 之前需要为 kubernetes 集群创建相应的集群网络路由表，具体的网络需要自行做好规划，创建路由表的方法请见 [这里](https://github.com/tencentcloud/tencentcloud-cloud-controller-manager/blob/master/route-ctl/README.md)。
 
 1. 创建 ConfigMap
 

@@ -1,6 +1,6 @@
 # Kubernetes Cloud Controller Manager for Tencent Cloud
 
-**Note**: 中文文档请参考[这里](https://github.com/dbdd4us/tencentcloud-cloud-controller-manager/blob/master/README_zhCN.md)
+**Note**: 中文文档请参考[这里](https://github.com/tencentcloud/tencentcloud-cloud-controller-manager/blob/master/README_zhCN.md)
 
 `tencentcloud-cloud-controller-manager` is the Kubernetes cloud controller manager implementation for Tencent Cloud Container Service. Read more about cloud controller managers [here](https://kubernetes.io/docs/tasks/administer-cluster/running-cloud-controller/).
 

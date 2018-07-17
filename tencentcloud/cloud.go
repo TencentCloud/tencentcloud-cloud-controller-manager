@@ -7,9 +7,9 @@ import (
 	"io/ioutil"
 	"os"
 
-	"github.com/dbdd4us/qcloudapi-sdk-go/cvm"
 	"github.com/dbdd4us/qcloudapi-sdk-go/ccs"
 	"github.com/dbdd4us/qcloudapi-sdk-go/common"
+	"github.com/dbdd4us/qcloudapi-sdk-go/cvm"
 
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/kubernetes/pkg/cloudprovider"

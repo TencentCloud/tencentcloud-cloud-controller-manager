@@ -11,8 +11,8 @@
 
 ```
 mkdir -p /root/go/src/github.com/dbdd4us/
-git clone https://github.com/dbdd4us/tencentcloud-cloud-controller-manager.git /root/go/src/github.com/dbdd4us/tencentcloud-cloud-controller-manager
-cd /root/go/src/github.com/dbdd4us/tencentcloud-cloud-controller-manager/route-ctl
+git clone https://github.com/tencentcloud/tencentcloud-cloud-controller-manager.git /root/go/src/github.com/tencentcloud/tencentcloud-cloud-controller-manager
+cd /root/go/src/github.com/tencentcloud/tencentcloud-cloud-controller-manager/route-ctl
 go build -v
 ```
 

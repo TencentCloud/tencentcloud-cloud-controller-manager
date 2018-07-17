@@ -1,8 +1,8 @@
 FROM golang:1.10
 
-ADD . /go/src/github.com/dbdd4us/tencentcloud-cloud-controller-manager
+ADD . /go/src/github.com/tencentcloud/tencentcloud-cloud-controller-manager
 
-WORKDIR /go/src/github.com/dbdd4us/tencentcloud-cloud-controller-manager
+WORKDIR /go/src/github.com/tencentcloud/tencentcloud-cloud-controller-manager
 
 RUN go build --ldflags '-linkmode external -extldflags "-static"' -v -o /go/src/bin/tencentcloud-cloud-controller-manager
 

@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/spf13/pflag"
-	_ "github.com/dbdd4us/tencentcloud-cloud-controller-manager/tencentcloud"
+	_ "github.com/tencentcloud/tencentcloud-cloud-controller-manager/tencentcloud"
 
 	utilflag "k8s.io/apiserver/pkg/util/flag"
 	"k8s.io/apiserver/pkg/util/logs"

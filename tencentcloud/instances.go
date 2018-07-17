@@ -2,9 +2,9 @@ package tencentcloud
 
 import (
 	"context"
-	"strings"
-	"fmt"
 	"errors"
+	"fmt"
+	"strings"
 
 	"github.com/dbdd4us/qcloudapi-sdk-go/cvm"
 

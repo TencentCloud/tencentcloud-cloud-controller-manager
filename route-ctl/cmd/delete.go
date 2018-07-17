@@ -3,10 +3,10 @@ package cmd
 import (
 	"os"
 
-	"github.com/spf13/cobra"
 	"github.com/dbdd4us/qcloudapi-sdk-go/ccs"
 	"github.com/dbdd4us/qcloudapi-sdk-go/common"
 	"github.com/sirupsen/logrus"
+	"github.com/spf13/cobra"
 )
 
 func init() {
@@ -33,12 +33,12 @@ var deleteCmd = &cobra.Command{
 			return err
 		}
 		_, err = client.DeleteClusterRouteTable(&ccs.DeleteClusterRouteTableArgs{
-			RouteTableName:      routeTableNameToDelete,
+			RouteTableName: routeTableNameToDelete,
 		})
 		return err
 	},
 }
 
 var (
-	routeTableNameToDelete      string
+	routeTableNameToDelete string
 )

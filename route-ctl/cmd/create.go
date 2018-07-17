@@ -6,10 +6,10 @@ import (
 	"os"
 	"text/tabwriter"
 
-	"github.com/spf13/cobra"
 	"github.com/dbdd4us/qcloudapi-sdk-go/ccs"
 	"github.com/dbdd4us/qcloudapi-sdk-go/common"
 	"github.com/sirupsen/logrus"
+	"github.com/spf13/cobra"
 )
 
 func init() {
@@ -72,9 +72,9 @@ var createCmd = &cobra.Command{
 			ignoreConflictOpt = 1
 		}
 		_, err = client.CreateClusterRouteTable(&ccs.CreateClusterRouteTableArgs{
-			RouteTableName:            routeTableName,
-			RouteTableCidrBlock:       routeTableCidrBlock,
-			VpcId:                     vpcId,
+			RouteTableName:      routeTableName,
+			RouteTableCidrBlock: routeTableCidrBlock,
+			VpcId:               vpcId,
 			IgnoreClusterCIDRConflict: ignoreConflictOpt,
 		})
 		return err
