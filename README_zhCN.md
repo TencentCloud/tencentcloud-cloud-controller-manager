@@ -64,6 +64,7 @@ data:
   TENCENTCLOUD_CLOUD_CONTROLLER_MANAGER_SECRET_ID: "<SECRET_ID>"
   TENCENTCLOUD_CLOUD_CONTROLLER_MANAGER_SECRET_KEY: "<SECRET_KEY>" 
   TENCENTCLOUD_CLOUD_CONTROLLER_MANAGER_CLUSTER_ROUTE_TABLE: "<CLUSTER_NETWORK_ROUTE_TABLE_NAME>" 
+  TENCENTCLOUD_CLOUD_CONTROLLER_MANAGER_VPC_ID: "<VPC_ID>"
 ```
 
 2. 创建 Deployment
@@ -122,6 +123,11 @@ spec:
               secretKeyRef:
                 name: tencentcloud-cloud-controller-manager-config
                 key: TENCENTCLOUD_CLOUD_CONTROLLER_MANAGER_CLUSTER_ROUTE_TABLE
+          - name: TENCENTCLOUD_CLOUD_CONTROLLER_MANAGER_VPC_ID
+            valueFrom:
+              secretKeyRef:
+                name: tencentcloud-cloud-controller-manager-config
+                key: TENCENTCLOUD_CLOUD_CONTROLLER_MANAGER_VPC_ID
 ```
 
 ## 创建 LoadBalancer Service
