@@ -10,9 +10,6 @@
 
 * nodecontroller - 更新 kubernetes node 相关的 addresses 信息。
 * routecontroller - 负责创建 vpc 内 pod 网段内的路由。
-
-接下来会实现:
-
 * servicecontroller - 当集群中创建了类型为 `LoadBalancer` 的 service 的时候，创建相应的LoadBalancers。
 
 ## 前置要求
@@ -67,6 +64,7 @@ data:
   TENCENTCLOUD_CLOUD_CONTROLLER_MANAGER_SECRET_ID: "<SECRET_ID>"
   TENCENTCLOUD_CLOUD_CONTROLLER_MANAGER_SECRET_KEY: "<SECRET_KEY>" 
   TENCENTCLOUD_CLOUD_CONTROLLER_MANAGER_CLUSTER_ROUTE_TABLE: "<CLUSTER_NETWORK_ROUTE_TABLE_NAME>" 
+  TENCENTCLOUD_CLOUD_CONTROLLER_MANAGER_VPC_ID: "<VPC_ID>"
 ```
 
 2. 创建 Deployment
@@ -125,4 +123,116 @@ spec:
               secretKeyRef:
                 name: tencentcloud-cloud-controller-manager-config
                 key: TENCENTCLOUD_CLOUD_CONTROLLER_MANAGER_CLUSTER_ROUTE_TABLE
+          - name: TENCENTCLOUD_CLOUD_CONTROLLER_MANAGER_VPC_ID
+            valueFrom:
+              secretKeyRef:
+                name: tencentcloud-cloud-controller-manager-config
+                key: TENCENTCLOUD_CLOUD_CONTROLLER_MANAGER_VPC_ID
+```
+
+## 创建 LoadBalancer Service
+
+**注意**：目前 LoadBalancer Cloud Provider 实现仅支持创建 `spec.sessionAffinity` 为 `None` 的 Service。
+
+当指定 Service 的 `spec.type` 字段为 `LoadBalancer` 时，会默认创建应用型的公网类型 Clb，可以通过指定 Service 的 `metadata.annotations` 字段来控制创建的 Clb 的类型。
+
+目前支持的 `annotations` 有：
+
+* `service.beta.kubernetes.io/tencentcloud-loadbalancer-kind`: 当指定为 `classic` 时创建传统型 Clb，当指定为 `application` 时创建应用型 Clb，默认值为 `application`。
+* `service.beta.kubernetes.io/tencentcloud-loadbalancer-type`：当指定为 `public` 时创建公网型 Clb，当指定为 `private` 时创建内网型 Clb，默认值为 `public`。
+* `service.beta.kubernetes.io/tencentcloud-loadbalancer-type-internal-subnet-id`：当创建的 Clb 类型为内网型时，必须要指定此字段，代表内网型 Clb 创建时的子网参数。
+* `service.beta.kubernetes.io/tencentcloud-loadbalancer-name`: 创建的 Clb 的名称。**注意**，仅当 Clb 需要创建或重新创建时，此参数才会生效。
+
+### 创建公网应用型 Clb
+
+```
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    run: nginx
+  annotations:
+    service.beta.kubernetes.io/tencentcloud-loadbalancer-kind: application
+    service.beta.kubernetes.io/tencentcloud-loadbalancer-type: public
+  name: nginx
+  namespace: default
+spec:
+  ports:
+  - port: 80
+    protocol: TCP
+    targetPort: 80
+  selector:
+    run: nginx
+  type: LoadBalancer
+```
+
+### 创建内网应用型 Clb
+
+```
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    run: nginx
+  annotations:
+    service.beta.kubernetes.io/tencentcloud-loadbalancer-kind: application
+    service.beta.kubernetes.io/tencentcloud-loadbalancer-type: private
+    service.beta.kubernetes.io/tencentcloud-loadbalancer-type-internal-subnet-id: subnet-xxxxxxxx
+  name: nginx
+  namespace: default
+spec:
+  ports:
+  - port: 80
+    protocol: TCP
+    targetPort: 80
+  selector:
+    run: nginx
+  type: LoadBalancer
+```
+
+### 创建公网传统型 Clb
+
+```
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    run: nginx
+  annotations:
+    service.beta.kubernetes.io/tencentcloud-loadbalancer-kind: classic
+    service.beta.kubernetes.io/tencentcloud-loadbalancer-type: public
+  name: nginx
+  namespace: default
+spec:
+  ports:
+  - port: 80
+    protocol: TCP
+    targetPort: 80
+  selector:
+    run: nginx
+  type: LoadBalancer
+```
+
+### 创建内网应用型 Clb
+
+```
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    run: nginx
+  annotations:
+    service.beta.kubernetes.io/tencentcloud-loadbalancer-kind: classic
+    service.beta.kubernetes.io/tencentcloud-loadbalancer-type: private
+    service.beta.kubernetes.io/tencentcloud-loadbalancer-type-internal-subnet-id: subnet-xxxxxxxx
+  name: nginx
+  namespace: default
+spec:
+  ports:
+  - port: 80
+    protocol: TCP
+    targetPort: 80
+  selector:
+    run: nginx
+  type: LoadBalancer
 ```

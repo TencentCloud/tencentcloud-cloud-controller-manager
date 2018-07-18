@@ -8,6 +8,7 @@ import (
 	"os"
 
 	"github.com/dbdd4us/qcloudapi-sdk-go/ccs"
+	"github.com/dbdd4us/qcloudapi-sdk-go/clb"
 	"github.com/dbdd4us/qcloudapi-sdk-go/common"
 	"github.com/dbdd4us/qcloudapi-sdk-go/cvm"
 
@@ -43,6 +44,9 @@ func NewCloud(config io.Reader) (cloudprovider.Interface, error) {
 	if c.Region == "" {
 		c.Region = os.Getenv("TENCENTCLOUD_CLOUD_CONTROLLER_MANAGER_REGION")
 	}
+	if c.VpcId == "" {
+		c.VpcId = os.Getenv("TENCENTCLOUD_CLOUD_CONTROLLER_MANAGER_VPC_ID")
+	}
 	if c.SecretId == "" {
 		c.SecretId = os.Getenv("TENCENTCLOUD_CLOUD_CONTROLLER_MANAGER_SECRET_ID")
 	}
@@ -62,12 +66,15 @@ type Cloud struct {
 
 	kubeClient kubernetes.Interface
 
-	cvm *cvm.Client
-	ccs *ccs.Client
+	cvm   *cvm.Client
+	cvmV3 *cvm.Client
+	ccs   *ccs.Client
+	clb   *clb.Client
 }
 
 type Config struct {
 	Region string `json:"region"`
+	VpcId  string `json:"vpc_id"`
 
 	SecretId  string `json:"secret_id"`
 	SecretKey string `json:"secret_key"`
@@ -87,6 +94,14 @@ func (cloud *Cloud) Initialize(clientBuilder controller.ControllerClientBuilder)
 		panic(err)
 	}
 	cloud.cvm = cvmClient
+	cvmV3Client, err := cvm.NewClient(
+		common.Credential{SecretId: cloud.config.SecretId, SecretKey: cloud.config.SecretKey},
+		common.Opts{Region: cloud.config.Region, Host: cvm.CvmV3Host, Path: cvm.CvmV3Path},
+	)
+	if err != nil {
+		panic(err)
+	}
+	cloud.cvmV3 = cvmV3Client
 	ccsClient, err := ccs.NewClient(
 		common.Credential{SecretId: cloud.config.SecretId, SecretKey: cloud.config.SecretKey},
 		common.Opts{Region: cloud.config.Region},
@@ -95,12 +110,20 @@ func (cloud *Cloud) Initialize(clientBuilder controller.ControllerClientBuilder)
 		panic(err)
 	}
 	cloud.ccs = ccsClient
+	clbClient, err := clb.NewClient(
+		common.Credential{SecretId: cloud.config.SecretId, SecretKey: cloud.config.SecretKey},
+		common.Opts{Region: cloud.config.Region},
+	)
+	if err != nil {
+		panic(err)
+	}
+	cloud.clb = clbClient
 	return
 }
 
 // LoadBalancer returns a balancer interface. Also returns true if the interface is supported, false otherwise.
 func (cloud *Cloud) LoadBalancer() (cloudprovider.LoadBalancer, bool) {
-	return nil, false
+	return cloud, true
 }
 
 // Instances returns an instances interface. Also returns true if the interface is supported, false otherwise.
