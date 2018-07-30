@@ -67,7 +67,101 @@ data:
   TENCENTCLOUD_CLOUD_CONTROLLER_MANAGER_VPC_ID: "<VPC_ID>"
 ```
 
-2. 创建 Deployment
+2. 创建 ServiceAccount
+
+```yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: cloud-controller-manager
+  namespace: kube-system
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  annotations:
+    rbac.authorization.kubernetes.io/autoupdate: "true"
+  name: system:cloud-controller-manager
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - events
+  verbs:
+  - create
+  - patch
+  - update
+- apiGroups:
+  - ""
+  resources:
+  - nodes
+  verbs:
+  - '*'
+- apiGroups:
+  - ""
+  resources:
+  - nodes/status
+  verbs:
+  - patch
+- apiGroups:
+  - ""
+  resources:
+  - services
+  verbs:
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - services/status
+  verbs:
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - serviceaccounts
+  verbs:
+  - create
+- apiGroups:
+  - ""
+  resources:
+  - persistentvolumes
+  verbs:
+  - get
+  - list
+  - update
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - endpoints
+  verbs:
+  - create
+  - get
+  - list
+  - watch
+  - update
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: system:cloud-controller-manager
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: system:cloud-controller-manager
+subjects:
+- kind: ServiceAccount
+  name: cloud-controller-manager
+  namespace: kube-system
+```
+
+3. 创建 Deployment
 
 ```yaml
 apiVersion: extensions/v1beta1
@@ -83,6 +177,7 @@ spec:
       labels:
         app: tencentcloud-cloud-controller-manager
     spec:
+      serviceAccountName: cloud-controller-manager
       dnsPolicy: Default
       tolerations:
         - key: "node.cloudprovider.kubernetes.io/uninitialized"
@@ -99,7 +194,6 @@ spec:
           - --cloud-provider=tencentcloud # 指定 cloud provider 为 tencentcloud
           - --allocate-node-cidrs=true # 指定 cloud provider 为 tencentcloud 为 node 分配 cidr
           - --cluster-cidr=192.168.0.0/20 # 集群 pod 所在网络，需要提前创建
-          - --master=<KUBERNETES_MASTER_INSECURE_ENDPOINT> # master 的非 https api 地址
           - --configure-cloud-routes=true
           - --allow-untagged-cloud=true
         env:
