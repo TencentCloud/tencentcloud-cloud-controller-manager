@@ -5,6 +5,8 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
+	"github.com/tencentcloud/tencentcloud-cloud-controller-manager/route-ctl/cmd/route"
+	"github.com/tencentcloud/tencentcloud-cloud-controller-manager/route-ctl/cmd/routetable"
 )
 
 var rootCmd = &cobra.Command{
@@ -13,6 +15,30 @@ var rootCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		return
 	},
+}
+
+func init() {
+	routeTableCmd := &cobra.Command{
+		Use:   "route-table",
+		Short: "route table releated operations",
+	}
+
+	routeTableCmd.AddCommand(routetable.ListCmd)
+	routeTableCmd.AddCommand(routetable.CreateCmd)
+	routeTableCmd.AddCommand(routetable.DeleteCmd)
+
+	routeCmd := &cobra.Command{
+		Use:   "route",
+		Short: "route releated operations",
+	}
+
+	routeCmd.AddCommand(route.ListCmd)
+	routeCmd.AddCommand(route.CreateCmd)
+	routeCmd.AddCommand(route.DeleteCmd)
+
+	rootCmd.AddCommand(routeTableCmd)
+	rootCmd.AddCommand(routeCmd)
+
 }
 
 func Execute() {

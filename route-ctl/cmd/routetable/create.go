@@ -1,4 +1,4 @@
-package cmd
+package routetable
 
 import (
 	"fmt"
@@ -13,20 +13,18 @@ import (
 )
 
 func init() {
-	rootCmd.AddCommand(createCmd)
+	CreateCmd.Flags().StringVar(&routeTableName, "route-table-name", "", "name of the route table to create")
+	CreateCmd.Flags().StringVar(&routeTableCidrBlock, "route-table-cidr-block", "", "cidr of the route table to create")
+	CreateCmd.Flags().StringVar(&vpcId, "vpc-id", "", "vpc id of the route table to create")
+	CreateCmd.Flags().BoolVar(&ignoreConflict, "ignore-cidr-conflict", false, "Default false, ignore any cidr conflict when create route table. (Caution: This may results in disaster, use it very carefully)")
 
-	createCmd.Flags().StringVar(&routeTableName, "route-table-name", "", "name of the route table to create")
-	createCmd.Flags().StringVar(&routeTableCidrBlock, "route-table-cidr-block", "", "cidr of the route table to create")
-	createCmd.Flags().StringVar(&vpcId, "vpc-id", "", "vpc id of the route table to create")
-	createCmd.Flags().BoolVar(&ignoreConflict, "ignore-cidr-conflict", false, "Default false, ignore any cidr conflict when create route table. (Caution: This may results in disaster, use it very carefully)")
-
-	createCmd.MarkFlagRequired("route-table-name")
-	createCmd.MarkFlagRequired("route-table-cidr-block")
-	createCmd.MarkFlagRequired("vpc-id")
+	CreateCmd.MarkFlagRequired("route-table-name")
+	CreateCmd.MarkFlagRequired("route-table-cidr-block")
+	CreateCmd.MarkFlagRequired("vpc-id")
 
 }
 
-var createCmd = &cobra.Command{
+var CreateCmd = &cobra.Command{
 	Use:   "create",
 	Short: "create route table",
 	RunE: func(cmd *cobra.Command, args []string) error {

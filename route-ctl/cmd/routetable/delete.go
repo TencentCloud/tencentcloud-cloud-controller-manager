@@ -1,4 +1,4 @@
-package cmd
+package routetable
 
 import (
 	"os"
@@ -10,15 +10,13 @@ import (
 )
 
 func init() {
-	rootCmd.AddCommand(deleteCmd)
+	DeleteCmd.Flags().StringVar(&routeTableNameToDelete, "route-table-name", "", "name of the route table to create")
 
-	deleteCmd.Flags().StringVar(&routeTableNameToDelete, "route-table-name", "", "name of the route table to create")
-
-	deleteCmd.MarkFlagRequired("route-table-name")
+	DeleteCmd.MarkFlagRequired("route-table-name")
 
 }
 
-var deleteCmd = &cobra.Command{
+var DeleteCmd = &cobra.Command{
 	Use:   "delete",
 	Short: "delete route table",
 	RunE: func(cmd *cobra.Command, args []string) error {
