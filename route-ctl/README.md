@@ -30,7 +30,7 @@ export QCloudCcsAPIRegion=ap-shanghai
 
 ### 创建路由表
 ```
-./route-ctl create --route-table-cidr-block 10.10.0.0/16 --route-table-name route-table-test --vpc-id vpc-********
+./route-ctl route-table create --route-table-cidr-block 10.10.0.0/16 --route-table-name route-table-test --vpc-id vpc-********
 ```
 
 当通过 `route-ctl` 创建路由表时， `route-ctl` 会先检查所要创建的路由表的 `cidr` 是否和现存的网络设置冲突，具体的检查包括下面四项：
@@ -44,10 +44,25 @@ ___Note:___ 当存在 `cidr` 冲突时，`route-ctl` 支持通过 `--ignore-cidr
 
 ### 查看现存的路由表
 ```
-./route-ctl list
+./route-ctl route-table list
 ```
 
 ### 删除指定路由表
 ```
-./route-ctl delete --route-table-name route-table-test
+./route-ctl route-table delete --route-table-name route-table-test
+```
+
+### 创建路由
+```
+./route-ctl route create --destination-cidr-block 10.10.1.0/24 --route-table-name route-table-test --gateway-ip 192.168.1.4
+```
+
+### 查看现存的路由
+```
+./route-ctl route list --route-table-name route-table-test
+```
+
+### 删除指定路由
+```
+./route-ctl route delete --destination-cidr-block 10.10.1.0/24 --route-table-name route-table-test --gateway-ip 192.168.1.4
 ```
