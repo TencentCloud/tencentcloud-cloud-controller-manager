@@ -10,7 +10,7 @@
 将此项目 clone 到 GOPATH 下，假设 GOPATH 为 /root/go
 
 ```
-mkdir -p /root/go/src/github.com/dbdd4us/
+mkdir -p /root/go/src/github.com/tencentcloud/
 git clone https://github.com/tencentcloud/tencentcloud-cloud-controller-manager.git /root/go/src/github.com/tencentcloud/tencentcloud-cloud-controller-manager
 cd /root/go/src/github.com/tencentcloud/tencentcloud-cloud-controller-manager/route-ctl
 go build -v
