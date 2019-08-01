@@ -115,6 +115,9 @@ func (cloud *Cloud) getInstanceByInstancePrivateIp(privateIp string) (*cvm.Insta
 		return nil, err
 	}
 	for _, instance := range instances.InstanceSet {
+		if instance.VirtualPrivateCloud.VpcID != cloud.config.VpcId {
+			continue
+		}
 		for _, ip := range instance.PrivateIPAddresses {
 			if ip == privateIp {
 				return &instance, nil
@@ -133,6 +136,9 @@ func (cloud *Cloud) getInstanceByInstanceID(instanceID string) (*cvm.InstanceInf
 		return nil, err
 	}
 	for _, instance := range instances.InstanceSet {
+		if instance.VirtualPrivateCloud.VpcID != cloud.config.VpcId {
+			continue
+		}
 		if instance.InstanceID == instanceID {
 			return &instance, nil
 		}
