@@ -96,7 +96,7 @@ spec:
           value: "true"
           effect: "NoSchedule"
       containers:
-      - image: ccr.ccs.tencentyun.com/library/tencentcloud-cloud-controller-manager:latest
+      - image: ccr.ccs.tencentyun.com/library/tencentcloud-cloud-controller-manager:1.0.1
         name: tencentcloud-cloud-controller-manager
         command:
           - /bin/tencentcloud-cloud-controller-manager
