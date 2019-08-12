@@ -2,7 +2,7 @@
 
 `tencentcloud-cloud-controller-manager` 是腾讯云容器服务的 cloud controller manager 的实现。cloud controller manager 相关信息可以查看 [这里](https://kubernetes.io/docs/tasks/administer-cluster/running-cloud-controller/).
 
-**WARNING**: 当前项目处于正在开发的状态，请谨慎在生产环境使用。当前，只有 kubernetes 1.10.x 是支持的。
+当前支持 kubernetes 1.10,1.12,1.14。
 
 ## 功能
 
@@ -26,6 +26,10 @@
 ### Kubernetes 节点的名字需要和节点的内网 ip 相同
 
 默认情况下，kubelet 会使用节点的 hostname 作为节点的名称。可以使用 --hostname-override 参数使用节点的内网 ip 覆盖掉节点本身的 hostname，从而使得节点的名称和节点的内网 ip 保持一致。这一点非常重要，否则 cloud controller manager 会无法找到对应 kubernetes 节点的云服务器。
+
+### kubelet心跳上报频率
+默认kubelet心跳频率为10s,有一定概率会导致cloud controller manager 更新node状态失败，需要调整一下kubelet心跳上报频率
+--node-status-update-frequency=30s
 
 ## 编译
 
@@ -102,6 +106,8 @@ spec:
           - --master=<KUBERNETES_MASTER_INSECURE_ENDPOINT> # master 的非 https api 地址
           - --configure-cloud-routes=true
           - --allow-untagged-cloud=true
+          - --node-monitor-period=60s
+          - --route-reconciliation-period=60s
         env:
           - name: TENCENTCLOUD_CLOUD_CONTROLLER_MANAGER_REGION
             valueFrom:
