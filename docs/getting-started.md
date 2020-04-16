@@ -2,8 +2,9 @@
 
 ## Prerequisites
 
-* A K8s cluster with version 1.10, 1.12, or 1.14 using VPC network
+* A K8s cluster with version 1.10, 1.12, or 1.14 in a VPC network
 * Each node should have a node name same as its IP address, or CCM can't initialize them. Using `--hostname-override` flag of `kubelet` is recommended.
+* A route table is required for the Pod network. We build `route-ctl` to support the route table creation. See [route-ctl](https://github.com/TencentCloud/tencentcloud-cloud-controller-manager/tree/master/route-ctl).
 
 ## Tencent Cloud CCM Installation
 
@@ -15,7 +16,7 @@ Clear the flag `--cloud-provider` of `kube-apiserver` and `kube-controller-manag
 
 The sample manifests are [here](https://raw.githubusercontent.com/TencentCloud/tencentcloud-cloud-controller-manager/master/docs/example-manifests/out-of-tree/kube-apiserver.yaml).
 
-More details are in [the official documents](https://kubernetes.io/docs/tasks/administer-cluster/running-cloud-controller/#running-cloud-controller-manager)
+More details are in [the official documents](https://kubernetes.io/docs/tasks/administer-cluster/running-cloud-controller/#running-cloud-controller-manager).
 
 ### Update the kubelet configuration
 
@@ -30,7 +31,7 @@ The following parameters should be determined before deploying. These placeholde
 | ---- | ---- | ---- |
 | <REGION> | The region your CVMs assisted | All region IDs(with a prefix `ap-`) could be found in section `Region List` of the [document](https://intl.cloud.tencent.com/document/api/213/31574) |
 | <SECRET_ID> & <SECRET_KEY> | Identity to access the Tencent Cloud API | Following the [document](https://intl.cloud.tencent.com/document/product/598/34228) |
-| <CLUSTER_NETWORK_ROUTE_TABLE_NAME> | ID of the route table of Pod network | It can be found on [TencentCloud Route Console](https://console.cloud.tencent.com/vpc/route) , usually has a prefix `rtb-`. |
+| <CLUSTER_NETWORK_ROUTE_TABLE_NAME> | Route table name of the Pod network | The route table must be created via the utility `route-ctl`. See [route-ctl](https://github.com/TencentCloud/tencentcloud-cloud-controller-manager/tree/master/route-ctl) |
 | <TENCENTCLOUD_CLOUD_CONTROLLER_MANAGER_VPC_ID> | ID of the current VPC Network | It can be found on [TencentCloud VPC Console](https://console.cloud.tencent.com/vpc/vpc) , usually has a prefix `vpc-`. |
 
 
@@ -47,7 +48,13 @@ To deploy CCM,
 kubectl apply -f https://raw.githubusercontent.com/TencentCloud/tencentcloud-cloud-controller-manager/master/docs/example-manifests/out-of-tree/cloud-controller-manager.yaml
 ```
 
+### Choose a container network plugin
+
+If `--configure-cloud-routes` of CCM is enabled, the `kubernet` plugin is recommended to handle traffic among Pods along with the VPC network.
+You can follow the [document](https://kubernetes.io/docs/concepts/extend-kubernetes/compute-storage-net/network-plugins/#kubenet) to set it up.
+In addition, you need to add some `iptables rules` to accept traffic forwarded between `cbr0` and `eth0`.
+
 ### Verify the installation
 
-1. Wait until all nodes ready.
+1. Wait until all nodes ready. It may take a few minutes.
 2. Deploy [the sample of Service](https://github.com/TencentCloud/tencentcloud-cloud-controller-manager/blob/master/docs/resources/service/README.md).
