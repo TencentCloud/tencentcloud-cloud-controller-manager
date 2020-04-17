@@ -1,26 +1,27 @@
 # route-ctl
 
-`route-ctl` 是一个用于在腾讯云 vpc 环境创建**容器网络专用路由表**的小工具，典型的应用场景包括
+中文文档在[这里](https://github.com/TencentCloud/tencentcloud-cloud-controller-manager/blob/master/route-ctl/README_zhCN.md)
 
-* 在腾讯云从云服务器手工搭建 kubernetes 且集群网络使用路由方案时，可以使用此工具创建 kubernetes 用来建立 pod 网络的子网，使得集群中的 pod 通信能够和腾讯云 vpc 打通
+`route-ctl` is a utility to build a route table for the Pod network. The route table is created in the same VPC in which CVMs occupied. 
+The route table is required if you would like to use Tencent Cloud Controller as a out-of-tree cloud provider in your Kubernetes cluster. 
 
 
-## 编译
+## Build
 
-将此项目 clone 到 GOPATH 下，假设 GOPATH 为 /root/go
-
+Before getting into code, you must install the go toolchain. The [official document](https://golang.org/doc/install#install) is provided as a reference. 
+Then, make sure that the environment variable `GOPATH` is set correctly in current terminal and,
 ```
-mkdir -p /root/go/src/github.com/tencentcloud/
-git clone https://github.com/tencentcloud/tencentcloud-cloud-controller-manager.git /root/go/src/github.com/tencentcloud/tencentcloud-cloud-controller-manager
-cd /root/go/src/github.com/tencentcloud/tencentcloud-cloud-controller-manager/route-ctl
+mkdir -p "${GOPATH}/src/github.com/tencentcloud/"
+git clone https://github.com/tencentcloud/tencentcloud-cloud-controller-manager.git "${GOPATH}/src/github.com/tencentcloud/tencentcloud-cloud-controller-manager"
+cd ${GOPATH}/src/github.com/tencentcloud/tencentcloud-cloud-controller-manager/route-ctl
 go build -v
 ```
 
-## 使用
+## Usage
 
-**注意**:  routetable 的 cidr 不能与对应 vpc 的 cidr、其他集群的 cidr 以及已经存在的子网的 cidr 存在冲突
-
-使用前需要通过环境变量设置 `QCloudSecretId`、 `QCloudSecretKey` 以及 `QCloudCcsAPIRegion`
+The authority identity should be provided before running any command. 
+You can found `SecretID(QCloudSecretId)` and `SecretKey(QCloudSecretKey)` by following the [guide](https://intl.cloud.tencent.com/document/product/598/34228). 
+The `QCloudCcsAPIRegion` specifies the region `route-ctl` will communicate with. An available region list is provided [here](https://intl.cloud.tencent.com/document/api/213/31574).
 
 ```
 export QCloudSecretId=************************************
@@ -28,41 +29,35 @@ export QCloudSecretKey=********************************
 export QCloudCcsAPIRegion=ap-shanghai
 ```
 
-### 创建路由表
+### Create route table
 ```
 ./route-ctl route-table create --route-table-cidr-block 10.10.0.0/16 --route-table-name route-table-test --vpc-id vpc-********
 ```
 
-当通过 `route-ctl` 创建路由表时， `route-ctl` 会先检查所要创建的路由表的 `cidr` 是否和现存的网络设置冲突，具体的检查包括下面四项：
+Notice that the CIDR specified by `--route-table-cidr-block` must not overlap any subnet CIDR or cluster CIDR in the same VPC. 
+If some CIDR in the VPC is overlapped and `--ignore-cidr-conflict` is enabled, the routes to the overlapped subnet will also be overridden. It is **DANGEROUS**.
 
-1. route table 所在 vpc 的 cidr
-2. route table 所在 vpc 的子网路由的 cidr
-3. route table 所在 vpc 的 ccs 集群的集群网络 cidr
-4. route table 所在 vpc 的其它通过 route-ctl 创建的 route table 的 cidr
-
-___Note:___ 当存在 `cidr` 冲突时，`route-ctl` 支持通过 `--ignore-cidr-conflict` 选项忽略冲突进行创建，需要注意的是，通过 route table 创建的具体路由条目在 vpc 内拥有最高的匹配优先级，忽略 `cidr` 冲突进行创建可能会导致现存的网络出现问题，___请谨慎使用___。
-
-### 查看现存的路由表
+### List all route tables
 ```
 ./route-ctl route-table list
 ```
 
-### 删除指定路由表
+### Delete route table
 ```
 ./route-ctl route-table delete --route-table-name route-table-test
 ```
 
-### 创建路由
+### Create a route
 ```
 ./route-ctl route create --destination-cidr-block 10.10.1.0/24 --route-table-name route-table-test --gateway-ip 192.168.1.4
 ```
 
-### 查看现存的路由
+### List all routes in the specific route table
 ```
 ./route-ctl route list --route-table-name route-table-test
 ```
 
-### 删除指定路由
+### Delete a route
 ```
 ./route-ctl route delete --destination-cidr-block 10.10.1.0/24 --route-table-name route-table-test --gateway-ip 192.168.1.4
 ```
