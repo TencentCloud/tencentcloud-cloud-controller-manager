@@ -1,3 +1,74 @@
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: system:cloud-controller-manager
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - persistentvolumes
+      - services
+      - endpoints
+      - serviceaccounts
+    verbs:
+      - get
+      - list
+      - watch
+      - create
+      - update
+      - patch
+  - apiGroups:
+      - ""
+    resources:
+      - nodes
+    verbs:
+      - get
+      - list
+      - watch
+      - delete
+      - patch
+      - update
+  - apiGroups:
+      - ""
+    resources:
+      - services/status
+    verbs:
+      - update
+  - apiGroups:
+      - ""
+    resources:
+      - nodes/status
+    verbs:
+      - patch
+      - update
+  - apiGroups:
+      - ""
+    resources:
+      - events
+      - endpoints
+    verbs:
+      - create
+      - patch
+      - update
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: system:cloud-controller-manager
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: system:cloud-controller-manager
+subjects:
+  - kind: ServiceAccount
+    name: cloud-controller-manager
+    namespace: kube-system
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: cloud-controller-manager
+  namespace: kube-system
 ---
 apiVersion: v1
 kind: Secret
@@ -38,6 +109,7 @@ spec:
                     operator: Exists
       dnsPolicy: Default
       hostNetwork: true
+      serviceAccountName: cloud-controller-manager
       tolerations:
         - key: "node.cloudprovider.kubernetes.io/uninitialized"
           value: "true"
@@ -56,7 +128,6 @@ spec:
             - --cloud-provider=tencentcloud
             - --allocate-node-cidrs=true
             - --cluster-cidr=192.168.0.0/20
-            - --master=http://127.0.0.1:8080
             - --configure-cloud-routes=true
             - --allow-untagged-cloud=true
             - --node-monitor-period=60s

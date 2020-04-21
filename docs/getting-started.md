@@ -61,10 +61,6 @@ In addition, you need to add some `iptables rules` to accept traffic forwarded b
 
 #### 3. Install CCM
 
-Since the provided manifests don't contain any RBAC resources, CCM needs some privileges to access Nodes and Services.
-A easy way would be using insecure endpoint of the API server, that is usually enabled by default on `http://127.0.0.1:8080`.
-We also need to schedule CCM on masters and grant it to use the host network.
-
 For cluster which version belows v1.16, run the command below to install CCM.
 ```shell script
 kubectl apply -f https://raw.githubusercontent.com/TencentCloud/tencentcloud-cloud-controller-manager/master/docs/example-manifests/out-of-tree/cloud-controller-manager.yaml
